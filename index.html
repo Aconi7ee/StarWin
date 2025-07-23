@@ -2,6 +2,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+  </script>
   <meta charset="UTF-8">
   <title>Crash Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,6 +44,44 @@
   </style>
 </head>
 <body>
+<div id="onlineIndicator">
+  <span class="dot"></span>
+  <span id="onlineCount">Онлайн: ~123</span>
+</div>
+<style>
+  #onlineIndicator {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #00ffcc;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 6px #00ffcc44;
+    animation: fadeIn 1s ease-out;
+  }
+  .dot {
+    height: 10px;
+    width: 10px;
+    background-color: #00ffcc;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ffcc;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 4px #00ffcc; }
+    50% { box-shadow: 0 0 10px #00ffcc; }
+    100% { box-shadow: 0 0 4px #00ffcc; }
+  }
+</style>
+
 <div id="tsparticles"></div>
 <div class="container">
   <button id="redepositBtn" disabled>💳 Додеп 1000$</button>
@@ -71,10 +114,8 @@ redepositBtn = document.getElementById("redepositBtn"), statusEl = document.getE
 historyList = document.getElementById("historyList"), autoToggle = document.getElementById("autoCashoutToggle"),
 autoValue = document.getElementById("autoCashoutValue");
 window.onload = () => {
-  const saved = localStorage.getItem("crashHistory");
-  if (saved) { crashHistory = JSON.parse(saved); renderHistory(); }
-  const savedBalance = localStorage.getItem("balance");
-  if (savedBalance !== null) { balance = parseInt(savedBalance); }
+  crashHistory = [];
+  balance = 1000;
   updateBalance();
 };
 startBtn.onclick = () => {
@@ -118,7 +159,7 @@ function crash() {
 }
 function updateBalance() {
   balanceEl.textContent = balance;
-  localStorage.setItem("balance", balance);
+  
   redepositBtn.disabled = !(balance === 0 && !isPlaying);
 }
 function generateCrashPoint() {
@@ -127,7 +168,7 @@ function generateCrashPoint() {
 function saveToHistory(value) {
   const entry = { value: parseFloat(value.toFixed(2)), time: Date.now() };
   crashHistory.unshift(entry); if (crashHistory.length > 20) crashHistory.pop();
-  localStorage.setItem("crashHistory", JSON.stringify(crashHistory)); renderHistory();
+   renderHistory();
 }
 function renderHistory() {
   historyList.innerHTML = "";
